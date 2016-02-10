@@ -976,6 +976,14 @@
         }
     };
 
+    GridStack.prototype.refresh_nodes = function() {
+        var that = this;
+        this.remove_all(false);
+        this.container.find('.' + this.opts.item_class).each(function(k, node){
+            that._prepare_element(node);
+        });
+    };
+
     scope.GridStackUI = GridStack;
 
     scope.GridStackUI.Utils = Utils;
