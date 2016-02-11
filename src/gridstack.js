@@ -984,6 +984,57 @@
         });
     };
 
+    GridStack.prototype.where_will_be_placed = function(node) {
+        var offset = this.container.offset(),
+            position = this.container.position(),
+            nodeOffset = node.offset();
+
+        // offset relative to gridstack container itself
+        nodeOffset = {
+            left: nodeOffset.left - offset.left + position.left,
+            top: nodeOffset.top - offset.top + position.top
+        };
+
+        var cell = this.get_cell_from_pixel(nodeOffset);
+
+        // if size defined on node, use that
+        var size = {
+            width: node.attr('data-width') || 1,
+            height: node.attr('data-height') || 1
+        };
+
+        var isInsideGrid = cell.x >= 0 && cell.x < this.opts.width && cell.y >= 0 && cell.y < this.opts.height;
+        var isAreaEmpty = this.is_area_empty(cell.x, cell.y, size.width, size.height);
+
+        if (!isInsideGrid) {
+            return false;
+        }
+
+        if (!isAreaEmpty) {
+            // try with 1:1 size if this doesn't fit
+            if (size.width > 1 || size.height > 1) {
+                size = {
+                    width: 1,
+                    height: 1
+                };
+                isAreaEmpty = this.is_area_empty(cell.x, cell.y, size.width, size.height);
+
+                if (!isAreaEmpty) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        return {
+            x: cell.x,
+            y: cell.y,
+            width: size.width,
+            height: size.height
+        };
+    };
+
     scope.GridStackUI = GridStack;
 
     scope.GridStackUI.Utils = Utils;
