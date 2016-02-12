@@ -472,11 +472,7 @@
             '<div class="' + this.opts.placeholder_class + ' ' + this.opts.item_class + '">' +
             '<div class="placeholder-content" /></div>').hide();
 
-        var gridHeight = this.grid.get_grid_height();
-        if (!gridHeight) {
-            gridHeight = this.opts.height;
-        }
-        this.container.height(gridHeight * (this.opts.cell_height + this.opts.vertical_margin) - this.opts.vertical_margin);
+        this.container.height(this._calculate_container_height());
 
         this.on_resize_handler = function() {
             if (self._is_one_column_mode()) {
@@ -594,13 +590,19 @@
         }
     };
 
+    GridStack.prototype._calculate_container_height = function() {
+        var gridHeight = this.grid.get_grid_height();
+        if (!gridHeight) {
+            gridHeight = this.opts.height;
+        }
+        return gridHeight * (this.opts.cell_height + this.opts.vertical_margin) - this.opts.vertical_margin;
+    };
+
     GridStack.prototype._update_container_height = function() {
         if (this.grid._update_counter) {
             return;
         }
-        this.container.height(
-            this.grid.get_grid_height() * (this.opts.cell_height + this.opts.vertical_margin) -
-            this.opts.vertical_margin);
+        this.container.height(this._calculate_container_height());
     };
 
     GridStack.prototype._is_one_column_mode = function() {
@@ -840,39 +842,39 @@
         return this;
     };
 
-	GridStack.prototype.min_height = function (el, val) {
-		el = $(el);
-		el.each(function (index, el) {
-			el = $(el);
-			var node = el.data('_gridstack_node');
-			if (typeof node == 'undefined' || node == null) {
-				return;
-			}
+    GridStack.prototype.min_height = function (el, val) {
+        el = $(el);
+        el.each(function (index, el) {
+            el = $(el);
+            var node = el.data('_gridstack_node');
+            if (typeof node == 'undefined' || node == null) {
+                return;
+            }
 
-			if(!isNaN(val)){
-				node.min_height = (val || false);
-				el.attr('data-gs-min-height', val);
-			}
-		});
-		return this;
-	};
+            if(!isNaN(val)){
+                node.min_height = (val || false);
+                el.attr('data-gs-min-height', val);
+            }
+        });
+        return this;
+    };
 
-	GridStack.prototype.min_width = function (el, val) {
-		el = $(el);
-		el.each(function (index, el) {
-			el = $(el);
-			var node = el.data('_gridstack_node');
-			if (typeof node == 'undefined' || node == null) {
-				return;
-			}
+    GridStack.prototype.min_width = function (el, val) {
+        el = $(el);
+        el.each(function (index, el) {
+            el = $(el);
+            var node = el.data('_gridstack_node');
+            if (typeof node == 'undefined' || node == null) {
+                return;
+            }
 
-			if(!isNaN(val)){
-				node.min_width = (val || false);
-				el.attr('data-gs-min-width', val);
-			}
-		});
-		return this;
-	};
+            if(!isNaN(val)){
+                node.min_width = (val || false);
+                el.attr('data-gs-min-width', val);
+            }
+        });
+        return this;
+    };
 
     GridStack.prototype._update_element = function(el, callback) {
         el = $(el).first();
@@ -931,7 +933,7 @@
         if (val == this.opts.cell_height)
             return;
         this.opts.cell_height = val || this.opts.cell_height;
-        this._update_styles();
+        this._update_styles(this.opts.height);
     };
 
     GridStack.prototype.cell_width = function() {
