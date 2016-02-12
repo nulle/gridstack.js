@@ -472,9 +472,11 @@
             '<div class="' + this.opts.placeholder_class + ' ' + this.opts.item_class + '">' +
             '<div class="placeholder-content" /></div>').hide();
 
-        this.container.height(
-            this.grid.get_grid_height() * (this.opts.cell_height + this.opts.vertical_margin) -
-            this.opts.vertical_margin);
+        var gridHeight = this.grid.get_grid_height();
+        if (!gridHeight) {
+            gridHeight = this.opts.height;
+        }
+        this.container.height(gridHeight * (this.opts.cell_height + this.opts.vertical_margin) - this.opts.vertical_margin);
 
         this.on_resize_handler = function() {
             if (self._is_one_column_mode()) {
