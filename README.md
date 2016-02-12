@@ -1,24 +1,23 @@
 gridstack.js
 ============
 
-gridstack.js is a jQuery plugin for widget layout. This is drag-and-drop multi-column grid. It allows you to build 
+gridstack.js is a jQuery plugin for widget layout. This is drag-and-drop multi-column grid. It allows you to build
 draggable responsive bootstrap v3 friendly layouts. It also works great with [knockout.js](http://knockoutjs.com) and
 touch devices.
 
 Inspired by [gridster.js](http://gridster.net). Built with love.
 
-Join gridstack.js on Slack: http://gridstackjs.troolee.com
+Join gridstack.js on Slack: https://gridstackjs.troolee.com
 
-[![Slack Status](https://gridstackjs.troolee.com/badge.svg)](http://gridstackjs.troolee.com)
+[![Slack Status](https://gridstackjs.troolee.com/badge.svg)](https://gridstackjs.troolee.com)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 - [Demo](#demo)
 - [Usage](#usage)
   - [Requirements](#requirements)
-  - [Rails integration](#rails-integration)
   - [Basic usage](#basic-usage)
   - [Options](#options)
   - [Grid attributes](#grid-attributes)
@@ -33,6 +32,7 @@ Join gridstack.js on Slack: http://gridstackjs.troolee.com
     - [enable(event)](#enableevent)
   - [API](#api)
     - [add_widget(el, x, y, width, height, auto_position)](#add_widgetel-x-y-width-height-auto_position)
+    - [make_widget(el)](#make_widgetel)
     - [batch_update()](#batch_update)
     - [cell_height()](#cell_height)
     - [cell_height(val)](#cell_heightval)
@@ -59,6 +59,8 @@ Join gridstack.js on Slack: http://gridstackjs.troolee.com
     - [GridStackUI.Utils.sort(nodes[, dir[, width]])](#gridstackuiutilssortnodes-dir-width)
   - [Touch devices support](#touch-devices-support)
   - [Use with knockout.js](#use-with-knockoutjs)
+  - [Use with angular.js](#use-with-angularjs)
+  - [Rails integration](#rails-integration)
   - [Change grid width](#change-grid-width)
   - [Extra CSS](#extra-css)
     - [Different grid widths](#different-grid-widths)
@@ -91,28 +93,24 @@ Usage
 ## Requirements
 
 * [lodash.js](https://lodash.com) (>= 3.5.0)
-* [jQuery](http://jquery.com) (>= 1.11.0) 
+* [jQuery](http://jquery.com) (>= 1.11.0)
 * [jQuery UI](http://jqueryui.com) (>= 1.11.0). Minimum required components: Core, Widget, Mouse, Draggable, Resizable
 * (Optional) [knockout.js](http://knockoutjs.com) (>= 3.2.0)
 * (Optional) [jquery-ui-touch-punch](https://github.com/furf/jquery-ui-touch-punch) for touch-based devices support
 
 Note: You can still use [underscore.js](http://underscorejs.org) (>= 1.7.0) instead of lodash.js
 
-## Rails integration
-
-For rails users, integration of gridstack.js and its dependencies can be done through [gridstack-js-rails](https://github.com/randoum/gridstack-js-rails)
-
 ## Basic usage
 
 ```html
 <div class="grid-stack">
-    <div class="grid-stack-item" 
-        data-gs-x="0" data-gs-y="0" 
+    <div class="grid-stack-item"
+        data-gs-x="0" data-gs-y="0"
         data-gs-width="4" data-gs-height="2">
             <div class="grid-stack-item-content"></div>
     </div>
-    <div class="grid-stack-item" 
-        data-gs-x="4" data-gs-y="0" 
+    <div class="grid-stack-item"
+        data-gs-x="4" data-gs-y="0"
         data-gs-width="4" data-gs-height="4">
             <div class="grid-stack-item-content"></div>
     </div>
@@ -131,19 +129,20 @@ $(function () {
 
 ## Options
 
-- `always_show_resize_handle` - if `true` the resizing handles are shown even if the user is not hovering over the widget 
-    (default: `false`) 
+- `always_show_resize_handle` - if `true` the resizing handles are shown even if the user is not hovering over the widget
+    (default: `false`)
 - `animate` - turns animation on (default: `false`)
 - `auto` - if `false` gridstack will not initialize existing items (default: `true`)
 - `cell_height` - one cell height (default: `60`)
-- `draggable` - allows to override jQuery UI draggable options. (default: `{handle: '.grid-stack-item-content', scroll: true, appendTo: 'body'}`) 
+- `draggable` - allows to override jQuery UI draggable options. (default: `{handle: '.grid-stack-item-content', scroll: true, appendTo: 'body'}`)
 - `handle` - draggable handle selector (default: `'.grid-stack-item-content'`)
 - `handle_class` - draggable handle class (e.g. `'grid-stack-item-content'`). If set `handle` is ignored (default: `null`)
 - `height` - maximum rows amount. Default is `0` which means no maximum rows
 - `float` - enable floating widgets (default: `false`) See [example](http://troolee.github.io/gridstack.js/demo/float.html)
 - `item_class` - widget class (default: `'grid-stack-item'`)
-- `min_width` - minimal width. If window width is less, grid will be shown in one-column mode (default: `768`)
+- `min_width` - minimal width. If window width is less, grid will be shown in one-column mode. You need also update your css file (`@media (max-width: 768px) {...}`) with corresponding value (default: `768`)
 - `placeholder_class` - class for placeholder (default: `'grid-stack-placeholder'`)
+- `placeholder_text` - placeholder default content (default: `''`)
 - `resizable` - allows to override jQuery UI resizable options. (default: `{autoHide: true, handles: 'se'}`)
 - `static_grid` - makes grid static (default `false`). If true widgets are not movable/resizable. You don't even need jQueryUI draggable/resizable.  A CSS class `grid-stack-static` is also added to the container.
 - `vertical_margin` - vertical gap size (default: `20`)
@@ -151,7 +150,7 @@ $(function () {
 
 ## Grid attributes
 
-- `data-gs-animate` - turns animation on 
+- `data-gs-animate` - turns animation on
 - `data-gs-width` - amount of columns
 - `data-gs-height` - maximum rows amount. Default is `0` which means no maximum rows.
 
@@ -161,13 +160,13 @@ $(function () {
 - `data-gs-width`, `data-gs-height` - element size
 - `data-gs-max-width`, `data-gs-min-width`, `data-gs-max-height`, `data-gs-min-height` - element constraints
 - `data-gs-no-resize` - disable element resizing
-- `data-gs-no-move` - disable element moving 
-- `data-gs-auto-position` - tells to ignore `data-gs-x` and `data-gs-y` attributes and to place element to the first 
+- `data-gs-no-move` - disable element moving
+- `data-gs-auto-position` - tells to ignore `data-gs-x` and `data-gs-y` attributes and to place element to the first
     available position
 - `data-gs-locked` - the widget will be locked. It means another widget wouldn't be able to move it during dragging or resizing.
 The widget can still be dragged or resized. You need to add `data-gs-no-resize` and `data-gs-no-move` attributes
 to completely lock the widget.
-    
+
 ## Events
 
 ### onchange(items)
@@ -259,9 +258,26 @@ var grid = $('.grid-stack').data('gridstack');
 grid.add_widget(el, 0, 0, 3, 2, true);
 ```
 
+### make_widget(el)
+
+If you add elements to your gridstack container by hand, you have to tell gridstack afterwards to make them widgets. If you want gridstack to add the elements for you, use `add_widget` instead.
+Makes the given element a widget and returns it.
+
+Parameters:
+
+- `el` - element to convert to a widget
+
+```javascript
+$('.grid-stack').gridstack();
+
+$('.grid-stack').append('<div id="gsi-1" data-gs-x="0" data-gs-y="0" data-gs-width="3" data-gs-height="2" data-gs-auto-position="1"></div>')
+var grid = $('.grid-stack').data('gridstack');
+grid.make_widget('gsi-1');
+```
+
 ### batch_update()
 
-Initailizes batch updates. You will see no changes until `commit` method is called. 
+Initailizes batch updates. You will see no changes until `commit` method is called.
 
 ### cell_height()
 
@@ -286,7 +302,7 @@ Finishes batch updates. Updates DOM nodes. You must call it after `batch_update`
 
 ### destroy()
 
-Destroys a grid instance. 
+Destroys a grid instance.
 
 ### disable()
 
@@ -325,7 +341,7 @@ Checks if specified area is empty.
 Locks/unlocks widget.
 
 - `el` - widget to modify.
-- `val` - if `true` widget will be locked. 
+- `val` - if `true` widget will be locked.
 
 ### min_width(el, val)
 
@@ -384,13 +400,13 @@ Parameters:
 Enables/Disables resizing.
 
 - `el` - widget to modify
-- `val` - if `true` widget will be resizable. 
+- `val` - if `true` widget will be resizable.
 
 ### set_static(static_value)
 
 Toggle the grid static state.  Also toggle the `grid-stack-static` class.
 
-- `static_value` - if `true` the grid become static. 
+- `static_value` - if `true` the grid become static.
 
 ### update(el, x, y, width, height)
 
@@ -415,7 +431,7 @@ else {
     alert('Not enough free space to place the widget');
 }
 ```
- 
+
 
 ## Utils
 
@@ -525,16 +541,26 @@ template:
         '       ....',
         '   </div>', // <-- NO SPACE **AFTER** </div>
         '</div> '    // <-- NO SPACE **BEFORE** </div>
-    ].join('')       // <-- JOIN WITH **EMPTY** STRING 
+    ].join('')       // <-- JOIN WITH **EMPTY** STRING
 ```
 
 Otherwise `addDisposeCallback` won't work.
 
 
+## Use with angular.js
+
+Please check [gridstack-angular](https://github.com/kdietrich/gridstack-angular)
+
+
+## Rails integration
+
+For rails users, integration of gridstack.js and its dependencies can be done through [gridstack-js-rails](https://github.com/randoum/gridstack-js-rails)
+
+
 ## Change grid width
 
-To change grid width (columns count), to addition to `width` option, CSS rules 
-for `.grid-stack-item[data-gs-width="X"]` and  `.grid-stack-item[data-gs-x="X"]` have to be changed accordingly. 
+To change grid width (columns count), to addition to `width` option, CSS rules
+for `.grid-stack-item[data-gs-width="X"]` and  `.grid-stack-item[data-gs-x="X"]` have to be changed accordingly.
 
 For instance for 3-column grid you need to rewrite CSS to be:
 
@@ -583,7 +609,7 @@ Or you can include `gridstack-extra.css`. See below for more details.
 ## Extra CSS
 
 There are few extra CSS batteries in `gridstack-extra.css` (`gridstack-extra.min.css`).
- 
+
 ### Different grid widths
 
 You can use other than 12 grid width:
@@ -600,7 +626,7 @@ See example: [2 grids demo](http://troolee.github.io/gridstack.js/demo/two.html)
 ## Save grid to array
 
 Because gridstack doesn't track any kind of user-defined widget id there is no reason to make serialization to be part
-of gridstack API. To serialize grid you can simply do something like this (let's say you store widget id inside `data-custom-id` 
+of gridstack API. To serialize grid you can simply do something like this (let's say you store widget id inside `data-custom-id`
 attribute):
 
 ```javascript
@@ -620,7 +646,7 @@ alert(JSON.stringify(res));
 
 See example: [Serialization demo](http://troolee.github.io/gridstack.js/demo/serialization.html)
 
-You can also use `onchange` event if you need to save only changed widgets right away they have been changed. 
+You can also use `onchange` event if you need to save only changed widgets right away they have been changed.
 
 ## Load grid from array
 
@@ -642,7 +668,7 @@ var grid = $('.grid-stack').data('gridstack');
 grid.remove_all();
 
 _.each(serialization, function (node) {
-    grid.add_widget($('<div><div class="grid-stack-item-content" /></div>'), 
+    grid.add_widget($('<div><div class="grid-stack-item-content" /></div>'),
         node.x, node.y, node.width, node.height);
 });
 ```
@@ -708,14 +734,14 @@ for i in range(N):
 	print '.grid-stack > .grid-stack-item[data-gs-y="%(index)s"] { top: %(height)spx }' % {'index': i , 'height': h}
 ```
 
-There are at least two more issues with gridstack in IE8 with jQueryUI resizable (it seems it doesn't work) and 
-droppable. If you have any suggestions about support of IE8 you are welcome here: https://github.com/troolee/gridstack.js/issues/76 
+There are at least two more issues with gridstack in IE8 with jQueryUI resizable (it seems it doesn't work) and
+droppable. If you have any suggestions about support of IE8 you are welcome here: https://github.com/troolee/gridstack.js/issues/76
 
 
 ## Nested grids
 
-Gridstack may be nested. All nested grids have an additional class `grid-stack-nested` which is assigned automatically 
-during initialization. 
+Gridstack may be nested. All nested grids have an additional class `grid-stack-nested` which is assigned automatically
+during initialization.
 See example: [Nested grid demo](http://troolee.github.io/gridstack.js/demo/nested.html)
 
 
@@ -728,6 +754,7 @@ Changes
 - add `static_grid` option.
 - add `min_width`/`min_height` methods (Thanks to @cvillemure)
 - add `destroy` method (Thanks to @zspitzer)
+- add `placeholder_text` option (Thanks to @slauyama)
 
 #### v0.2.3 (2015-06-23)
 
@@ -769,7 +796,7 @@ Changes
 - auto-generate css rules (widgets `height` and `top`)
 - add `GridStackUI.Utils.sort` utility function
 - add `remove_all` API method
-- add `resize` and `move` API methods 
+- add `resize` and `move` API methods
 - add `resizable` and `movable` API methods
 - add `data-gs-no-move` attribute
 - add `float` option
@@ -786,7 +813,7 @@ License
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2015 Pavel Reznikov
+Copyright (c) 2014-2016 Pavel Reznikov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -805,4 +832,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-

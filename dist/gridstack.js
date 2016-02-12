@@ -400,6 +400,7 @@
             height: parseInt(this.container.attr('data-gs-height')) || 0,
             item_class: 'grid-stack-item',
             placeholder_class: 'grid-stack-placeholder',
+            placeholder_text: '',
             handle: '.grid-stack-item-content',
             handle_class: null,
             cell_height: 60,
@@ -470,7 +471,7 @@
 
         this.placeholder = $(
             '<div class="' + this.opts.placeholder_class + ' ' + this.opts.item_class + '">' +
-            '<div class="placeholder-content" /></div>').hide();
+            '<div class="placeholder-content">' + this.opts.placeholder_text + '</div></div>').hide();
 
         this.container.height(
             this.grid.get_grid_height() * (this.opts.cell_height + this.opts.vertical_margin) -
@@ -635,6 +636,22 @@
 
         var cell_width, cell_height;
 
+        var drag_or_resize = function(event, ui) {
+            var x = Math.round(ui.position.left / cell_width),
+                y = Math.floor((ui.position.top + cell_height / 2) / cell_height),
+                width, height;
+            if (event.type != "drag") {
+                width = Math.round(ui.size.width / cell_width);
+                height = Math.round(ui.size.height / cell_height);
+            }
+
+            if (!self.grid.can_move_node(node, x, y, width, height)) {
+                return;
+            }
+            self.grid.move_node(node, x, y, width, height);
+            self._update_container_height();
+        };
+
         var on_start_moving = function(event, ui) {
             self.container.append(self.placeholder);
             var o = $(this);
@@ -652,6 +669,10 @@
 
             el.resizable('option', 'minWidth', Math.round(cell_width * (node.min_width || 1)));
             el.resizable('option', 'minHeight', self.opts.cell_height * (node.min_height || 1));
+
+            if (event.type == 'resizestart') {
+                o.find('.grid-stack-item').trigger('resizestart');
+            }
         };
 
         var on_end_moving = function(event, ui) {
@@ -669,36 +690,27 @@
             self._trigger_change_event();
 
             self.grid.end_update();
+
+            var nested_grids = o.find('.grid-stack');
+            if (nested_grids.length && event.type == 'resizestop') {
+                nested_grids.each(function(index, el) {
+                    $(el).data('gridstack').on_resize_handler();
+                });
+                o.find('.grid-stack-item').trigger('resizestop');
+            }
         };
 
-        el.draggable(_.extend(this.opts.draggable, {
-            start: on_start_moving,
-            stop: on_end_moving,
-            drag: function(event, ui) {
-                var x = Math.round(ui.position.left / cell_width),
-                    y = Math.floor((ui.position.top + cell_height / 2) / cell_height);
-                if (!self.grid.can_move_node(node, x, y, node.width, node.height)) {
-                    return;
-                }
-                self.grid.move_node(node, x, y);
-                self._update_container_height();
-            },
-            containment: this.opts.is_nested ? this.container.parent() : null
-        })).resizable(_.extend(this.opts.resizable, {
-            start: on_start_moving,
-            stop: on_end_moving,
-            resize: function(event, ui) {
-                var x = Math.round(ui.position.left / cell_width),
-                    y = Math.floor((ui.position.top + cell_height / 2) / cell_height),
-                    width = Math.round(ui.size.width / cell_width),
-                    height = Math.round(ui.size.height / cell_height);
-                if (!self.grid.can_move_node(node, x, y, width, height)) {
-                    return;
-                }
-                self.grid.move_node(node, x, y, width, height);
-                self._update_container_height();
-            }
-        }));
+        el
+            .draggable(_.extend(this.opts.draggable, {
+                containment: this.opts.is_nested ? this.container.parent() : null
+            }))
+            .on('dragstart', on_start_moving)
+            .on('dragstop', on_end_moving)
+            .on('drag', drag_or_resize)
+            .resizable(_.extend(this.opts.resizable, {}))
+            .on('resizestart', on_start_moving)
+            .on('resizestop', on_end_moving)
+            .on('resize', drag_or_resize);
 
         if (node.no_move || this._is_one_column_mode()) {
             el.draggable('disable');
@@ -728,6 +740,15 @@
         if (typeof height != 'undefined') el.attr('data-gs-height', height);
         if (typeof auto_position != 'undefined') el.attr('data-gs-auto-position', auto_position ? 'yes' : null);
         this.container.append(el);
+        this._prepare_element(el);
+        this._update_container_height();
+        this._trigger_change_event(true);
+
+        return el;
+    };
+
+    GridStack.prototype.make_widget = function(el) {
+        el = $(el);
         this._prepare_element(el);
         this._update_container_height();
         this._trigger_change_event(true);
@@ -770,6 +791,7 @@
     };
 
     GridStack.prototype.resizable = function(el, val) {
+        var self = this;
         el = $(el);
         el.each(function(index, el) {
             el = $(el);
@@ -779,7 +801,7 @@
             }
 
             node.no_resize = !(val || false);
-            if (node.no_resize) {
+            if (node.no_resize || self._is_one_column_mode()) {
                 el.resizable('disable');
             }
             else {
@@ -790,6 +812,7 @@
     };
 
     GridStack.prototype.movable = function(el, val) {
+        var self = this;
         el = $(el);
         el.each(function(index, el) {
             el = $(el);
@@ -799,7 +822,7 @@
             }
 
             node.no_move = !(val || false);
-            if (node.no_move) {
+            if (node.no_move || self._is_one_column_mode()) {
                 el.draggable('disable');
                 el.removeClass('ui-draggable-handle');
             }
@@ -980,10 +1003,22 @@
 
     scope.GridStackUI.Utils = Utils;
 
+    function event_stop_propagate(event) {
+        event.stopPropagation();
+    }
     $.fn.gridstack = function(opts) {
         return this.each(function() {
-            if (!$(this).data('gridstack')) {
-                $(this).data('gridstack', new GridStack(this, opts));
+            var o = $(this);
+            if (!o.data('gridstack')) {
+                o
+                    .data('gridstack', new GridStack(this, opts))
+                    .on('dragstart', event_stop_propagate)
+                    .on('dragstop', event_stop_propagate)
+                    .on('drag', event_stop_propagate)
+                    .on('resizestart', event_stop_propagate)
+                    .on('resizestop', event_stop_propagate)
+                    .on('resize', event_stop_propagate)
+                    .on('change', event_stop_propagate);
             }
         });
     };
