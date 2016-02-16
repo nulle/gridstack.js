@@ -115,11 +115,16 @@
         }
     };
 
-    GridStackEngine.prototype.is_area_empty = function(x, y, width, height) {
+    GridStackEngine.prototype.what_is_here = function(x, y, width, height) {
         var nn = {x: x || 0, y: y || 0, width: width || 1, height: height || 1};
         var collision_node = _.find(this.nodes, _.bind(function(n) {
             return Utils.is_intercepted(n, nn);
         }, this));
+        return collision_node;
+    };
+
+    GridStackEngine.prototype.is_area_empty = function(x, y, width, height) {
+        var collision_node = this.what_is_here(x, y, width, height);
         return collision_node == null;
     };
 
@@ -277,6 +282,9 @@
     };
 
     GridStackEngine.prototype.remove_node = function(node) {
+        if (!node) {
+            return;
+        }
         node._id = null;
         this.nodes = _.without(this.nodes, node);
         this._pack_nodes();
@@ -747,10 +755,7 @@
         if (typeof height != 'undefined') el.attr('data-gs-height', height);
         if (typeof auto_position != 'undefined') el.attr('data-gs-auto-position', auto_position ? 'yes' : null);
         this.container.append(el);
-        this._prepare_element(el);
-        this._update_container_height();
-        this._trigger_change_event(true);
-
+        this.make_widget(el);
         return el;
     };
 
@@ -1015,10 +1020,9 @@
         });
     };
 
-    GridStack.prototype.where_will_be_placed = function(node) {
+    GridStack.prototype.get_cell_from_absolute_pixel = function(nodeOffset) {
         var offset = this.container.offset(),
-            position = this.container.position(),
-            nodeOffset = node.offset();
+            position = this.container.position();
 
         // offset relative to gridstack container itself
         nodeOffset = {
@@ -1026,44 +1030,7 @@
             top: nodeOffset.top - offset.top + position.top
         };
 
-        var cell = this.get_cell_from_pixel(nodeOffset);
-
-        // if size defined on node, use that
-        var size = {
-            width: node.attr('data-width') || 1,
-            height: node.attr('data-height') || 1
-        };
-
-        var isInsideGrid = cell.x >= 0 && cell.x < this.opts.width && cell.y >= 0 && cell.y < this.opts.height;
-        var isAreaEmpty = this.is_area_empty(cell.x, cell.y, size.width, size.height);
-
-        if (!isInsideGrid) {
-            return false;
-        }
-
-        if (!isAreaEmpty) {
-            // try with 1:1 size if this doesn't fit
-            if (size.width > 1 || size.height > 1) {
-                size = {
-                    width: 1,
-                    height: 1
-                };
-                isAreaEmpty = this.is_area_empty(cell.x, cell.y, size.width, size.height);
-
-                if (!isAreaEmpty) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-
-        return {
-            x: cell.x,
-            y: cell.y,
-            width: size.width,
-            height: size.height
-        };
+        return this.get_cell_from_pixel(nodeOffset);
     };
 
     scope.GridStackUI = GridStack;
