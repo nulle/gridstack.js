@@ -449,7 +449,7 @@
                     max_height = Math.max(max_height, n.y + n.height);
                 }
             });
-            self._update_styles(max_height + 10);
+            self._update_styles(self.opts.height || (max_height + 10));
         }, this.opts.float, this.opts.height);
 
         if (this.opts.auto) {
@@ -474,6 +474,9 @@
             '<div class="placeholder-content">' + this.opts.placeholder_text + '</div></div>').hide();
 
         this.container.height(this._calculate_container_height());
+
+        // setting styles also for empty grids
+        this._update_styles();
 
         this.on_resize_handler = function() {
             if (self._is_one_column_mode()) {
@@ -555,7 +558,7 @@
         var prefix = '.' + this.opts._class + ' .' + this.opts.item_class;
 
         if (typeof max_height == 'undefined') {
-            max_height = this._styles._max;
+            max_height = this._styles._max || this.opts.height;
             this._init_styles();
             this._update_container_height();
         }
@@ -800,7 +803,7 @@
         el.each(function(index, el) {
             el = $(el);
             var node = el.data('_gridstack_node');
-            if (typeof node == 'undefined' || node == null) {
+            if (typeof node == 'undefined' || node == null || self.opts.static_grid) {
                 return;
             }
 
@@ -821,7 +824,7 @@
         el.each(function(index, el) {
             el = $(el);
             var node = el.data('_gridstack_node');
-            if (typeof node == 'undefined' || node == null) {
+            if (typeof node == 'undefined' || node == null || self.opts.static_grid) {
                 return;
             }
 
@@ -956,7 +959,7 @@
         if (val == this.opts.cell_height)
             return;
         this.opts.cell_height = val || this.opts.cell_height;
-        this._update_styles(this.opts.height);
+        this._update_styles();
     };
 
     GridStack.prototype.cell_width = function() {
@@ -1007,7 +1010,8 @@
         var that = this;
         this.remove_all(false);
         this.container.find('.' + this.opts.item_class).each(function(k, node){
-            that._prepare_element(node);
+            $(node).off('dragstart dragstop drag resizestart resizestop resize');
+            that.make_widget(node);
         });
     };
 
