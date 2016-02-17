@@ -668,6 +668,12 @@
         };
 
         var on_start_moving = function(event, ui) {
+            if (self.opts.draggable.handle && event.type === 'dragstart') {
+                // if handle specified, don't allow drag from anywhere else
+                if (!$(event.originalEvent.target).closest(self.opts.draggable.handle).length) {
+                    return false;
+                }
+            }
             self.container.append(self.placeholder);
             var o = $(this);
             self.grid.clean_nodes();
