@@ -1,11 +1,16 @@
 gridstack.js
 ============
 
-gridstack.js is a jQuery plugin for widget layout. This is drag-and-drop multi-column grid. It allows you to build
-draggable responsive bootstrap v3 friendly layouts. It also works great with [knockout.js](http://knockoutjs.com) and
-touch devices.
+[![Build Status](https://travis-ci.org/troolee/gridstack.js.svg?branch=master)](https://travis-ci.org/troolee/gridstack.js)
+[![Coverage Status](https://coveralls.io/repos/github/troolee/gridstack.js/badge.svg?branch=master)](https://coveralls.io/github/troolee/gridstack.js?branch=master)
+[![Dependency Status](https://david-dm.org/troolee/gridstack.js.svg)](https://david-dm.org/troolee/gridstack.js)
+[![devDependency Status](https://david-dm.org/troolee/gridstack.js/dev-status.svg)](https://david-dm.org/troolee/gridstack.js#info=devDependencies)
+[![Stories in Ready](https://badge.waffle.io/troolee/gridstack.js.png?label=ready&title=Ready)](http://waffle.io/troolee/gridstack.js)
 
-Inspired by [gridster.js](http://gridster.net). Built with love.
+gridstack.js is a jQuery plugin for widget layout. This is drag-and-drop multi-column grid. It allows you to build
+draggable responsive bootstrap v3 friendly layouts. It also works great with [knockout.js](http://knockoutjs.com), [angular.js](https://angularjs.org) and touch devices.
+
+Inspired by [gridster.js](https://github.com/ducksboard/gridster.js). Built with love.
 
 Join gridstack.js on Slack: https://gridstackjs.troolee.com
 
@@ -18,45 +23,13 @@ Join gridstack.js on Slack: https://gridstackjs.troolee.com
 - [Demo](#demo)
 - [Usage](#usage)
   - [Requirements](#requirements)
+      - [Using gridstack.js with jQuery UI](#using-gridstackjs-with-jquery-ui)
+  - [Install](#install)
   - [Basic usage](#basic-usage)
-  - [Options](#options)
-  - [Grid attributes](#grid-attributes)
-  - [Item attributes](#item-attributes)
-  - [Events](#events)
-    - [onchange(items)](#onchangeitems)
-    - [ondragstart(event, ui)](#ondragstartevent-ui)
-    - [ondragstop(event, ui)](#ondragstopevent-ui)
-    - [onresizestart(event, ui)](#onresizestartevent-ui)
-    - [onresizestop(event, ui)](#onresizestopevent-ui)
-    - [disable(event)](#disableevent)
-    - [enable(event)](#enableevent)
-  - [API](#api)
-    - [add_widget(el, x, y, width, height, auto_position)](#add_widgetel-x-y-width-height-auto_position)
-    - [make_widget(el)](#make_widgetel)
-    - [batch_update()](#batch_update)
-    - [cell_height()](#cell_height)
-    - [cell_height(val)](#cell_heightval)
-    - [cell_width()](#cell_width)
-    - [commit()](#commit)
-    - [destroy()](#destroy)
-    - [disable()](#disable)
-    - [enable()](#enable)
-    - [get_cell_from_pixel(position)](#get_cell_from_pixelposition)
-    - [is_area_empty(x, y, width, height)](#is_area_emptyx-y-width-height)
-    - [locked(el, val)](#lockedel-val)
-    - [min_width(el, val)](#min_widthel-val)
-    - [min_height(el, val)](#min_heightel-val)
-    - [movable(el, val)](#movableel-val)
-    - [move(el, x, y)](#moveel-x-y)
-    - [remove_widget(el, detach_node)](#remove_widgetel-detach_node)
-    - [remove_all()](#remove_all)
-    - [resize(el, width, height)](#resizeel-width-height)
-    - [resizable(el, val)](#resizableel-val)
-    - [set_static(static_value)](#set_staticstatic_value)
-    - [update(el, x, y, width, height)](#updateel-x-y-width-height)
-    - [will_it_fit(x, y, width, height, auto_position)](#will_it_fitx-y-width-height-auto_position)
-  - [Utils](#utils)
-    - [GridStackUI.Utils.sort(nodes[, dir[, width]])](#gridstackuiutilssortnodes-dir-width)
+  - [Migrating to v0.3.0](#migrating-to-v030)
+  - [Migrating to v0.2.5](#migrating-to-v025)
+  - [API Documentation](#api-documentation)
+  - [Questions and Answers](#questions-and-answers)
   - [Touch devices support](#touch-devices-support)
   - [Use with knockout.js](#use-with-knockoutjs)
   - [Use with angular.js](#use-with-angularjs)
@@ -68,9 +41,16 @@ Join gridstack.js on Slack: https://gridstackjs.troolee.com
   - [Load grid from array](#load-grid-from-array)
   - [Override resizable/draggable options](#override-resizabledraggable-options)
   - [IE8 support](#ie8-support)
+  - [Use with require.js](#use-with-requirejs)
   - [Nested grids](#nested-grids)
+  - [Resizing active grid](#resizing-active-grid)
+  - [Using AniJS](#using-anijs)
+- [The Team](#the-team)
 - [Changes](#changes)
-      - [v0.2.4 (development version)](#v024-development-version)
+      - [v0.3.0-dev (Development Version)](#v030-dev-development-version)
+      - [v0.2.6 (2016-08-17)](#v026-2016-08-17)
+      - [v0.2.5 (2016-03-02)](#v025-2016-03-02)
+      - [v0.2.4 (2016-02-15)](#v024-2016-02-15)
       - [v0.2.3 (2015-06-23)](#v023-2015-06-23)
       - [v0.2.2 (2014-12-23)](#v022-2014-12-23)
       - [v0.2.1 (2014-12-09)](#v021-2014-12-09)
@@ -84,7 +64,7 @@ Join gridstack.js on Slack: https://gridstackjs.troolee.com
 Demo
 ====
 
-Please visit http://troolee.github.io/gridstack.js/ for demo.
+Please visit http://troolee.github.io/gridstack.js/ for demo. Or check out [these example](http://troolee.github.io/gridstack.js/demo/).
 
 
 Usage
@@ -92,13 +72,46 @@ Usage
 
 ## Requirements
 
-* [lodash.js](https://lodash.com) (>= 3.5.0)
-* [jQuery](http://jquery.com) (>= 1.11.0)
-* [jQuery UI](http://jqueryui.com) (>= 1.11.0). Minimum required components: Core, Widget, Mouse, Draggable, Resizable
-* (Optional) [knockout.js](http://knockoutjs.com) (>= 3.2.0)
-* (Optional) [jquery-ui-touch-punch](https://github.com/furf/jquery-ui-touch-punch) for touch-based devices support
+* [lodash.js](https://lodash.com) (>= 3.5.0, full build)
+* [jQuery](http://jquery.com) (>= 3.1.0)
 
 Note: You can still use [underscore.js](http://underscorejs.org) (>= 1.7.0) instead of lodash.js
+
+#### Using gridstack.js with jQuery UI
+
+* [jQuery UI](http://jqueryui.com) (>= 1.12.0). Minimum required components: Core, Widget, Mouse, Draggable, Resizable
+* (Optional) [jquery-ui-touch-punch](https://github.com/furf/jquery-ui-touch-punch) for touch-based devices support
+
+## Install
+
+```html
+<link rel="stylesheet" href="gridstack.css" />
+<script src="gridstack.js"></script>
+<script src="gridstack.jQueryUI.js"></script>
+```
+
+* Using CDN:
+
+```html
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.2.6/gridstack.min.css" />
+<script type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.2.6/gridstack.min.js'></script>
+```
+
+* Using bower:
+
+```bash
+$ bower install gridstack
+```
+
+* Using npm:
+
+[![NPM version](https://img.shields.io/npm/v/gridstack.svg)](https://www.npmjs.com/package/gridstack)
+
+```bash
+$ npm install gridstack
+```
+
+You can download files from `dist` directory as well.
 
 ## Basic usage
 
@@ -119,329 +132,49 @@ Note: You can still use [underscore.js](http://underscorejs.org) (>= 1.7.0) inst
 <script type="text/javascript">
 $(function () {
     var options = {
-        cell_height: 80,
-        vertical_margin: 10
+        cellHeight: 80,
+        verticalMargin: 10
     };
     $('.grid-stack').gridstack(options);
 });
 </script>
 ```
 
-## Options
+## Migrating to v0.3.0
 
-- `always_show_resize_handle` - if `true` the resizing handles are shown even if the user is not hovering over the widget
-    (default: `false`)
-- `animate` - turns animation on (default: `false`)
-- `auto` - if `false` gridstack will not initialize existing items (default: `true`)
-- `cell_height` - one cell height (default: `60`)
-- `draggable` - allows to override jQuery UI draggable options. (default: `{handle: '.grid-stack-item-content', scroll: true, appendTo: 'body'}`)
-- `handle` - draggable handle selector (default: `'.grid-stack-item-content'`)
-- `handle_class` - draggable handle class (e.g. `'grid-stack-item-content'`). If set `handle` is ignored (default: `null`)
-- `height` - maximum rows amount. Default is `0` which means no maximum rows
-- `float` - enable floating widgets (default: `false`) See [example](http://troolee.github.io/gridstack.js/demo/float.html)
-- `item_class` - widget class (default: `'grid-stack-item'`)
-- `min_width` - minimal width. If window width is less, grid will be shown in one-column mode. You need also update your css file (`@media (max-width: 768px) {...}`) with corresponding value (default: `768`)
-- `placeholder_class` - class for placeholder (default: `'grid-stack-placeholder'`)
-- `placeholder_text` - placeholder default content (default: `''`)
-- `resizable` - allows to override jQuery UI resizable options. (default: `{autoHide: true, handles: 'se'}`)
-- `static_grid` - makes grid static (default `false`). If true widgets are not movable/resizable. You don't even need jQueryUI draggable/resizable.  A CSS class `grid-stack-static` is also added to the container.
-- `vertical_margin` - vertical gap size (default: `20`)
-- `width` - amount of columns (default: `12`)
+As of v0.3.0, gridstack introduces a new plugin system. The drag'n'drop functionality has been modified to take advantage of this system. Because of this, and to avoid dependency on core code from jQuery UI, the plugin was functionality was moved to a separate file.
 
-## Grid attributes
+To ensure gridstack continues to work, either include the additional `gridstack.jQueryUI.js` file into your HTML or use `gridstack.all.js`:
 
-- `data-gs-animate` - turns animation on
-- `data-gs-width` - amount of columns
-- `data-gs-height` - maximum rows amount. Default is `0` which means no maximum rows.
-
-## Item attributes
-
-- `data-gs-x`, `data-gs-y` - element position
-- `data-gs-width`, `data-gs-height` - element size
-- `data-gs-max-width`, `data-gs-min-width`, `data-gs-max-height`, `data-gs-min-height` - element constraints
-- `data-gs-no-resize` - disable element resizing
-- `data-gs-no-move` - disable element moving
-- `data-gs-auto-position` - tells to ignore `data-gs-x` and `data-gs-y` attributes and to place element to the first
-    available position
-- `data-gs-locked` - the widget will be locked. It means another widget wouldn't be able to move it during dragging or resizing.
-The widget can still be dragged or resized. You need to add `data-gs-no-resize` and `data-gs-no-move` attributes
-to completely lock the widget.
-
-## Events
-
-### onchange(items)
-
-Occurs when adding/removing widgets or existing widgets change their position/size
-
-```javascript
-var serialize_widget_map = function (items) {
-    console.log(items);
-};
-
-$('.grid-stack').on('change', function (e, items) {
-    serialize_widget_map(items);
-});
+```html
+<script src="gridstack.js"></script>
+<script src="gridstack.jQueryUI.js"></script>
 ```
 
-### ondragstart(event, ui)
+or
 
-```javascript
-$('.grid-stack').on('dragstart', function (event, ui) {
-    var grid = this;
-    var element = event.target;
-});
+```html
+<script src="gridstack.all.js"></script>
 ```
 
-### ondragstop(event, ui)
+We're working on implementing support for other drag'n'drop libraries through the new plugin system.
 
-```javascript
-$('.grid-stack').on('dragstop', function (event, ui) {
-    var grid = this;
-    var element = event.target;
-});
-```
+## Migrating to v0.2.5
 
-### onresizestart(event, ui)
+As of v0.2.5 all methods and parameters are in camel case to respect [JavaScript Style Guide and Coding Conventions](http://www.w3schools.com/js/js_conventions.asp).
+All old methods and parameters are marked as deprecated and still available but a warning will be displayed in js console. They will be available until v1.0
+when they will be completely removed.
 
-```javascript
-$('.grid-stack').on('resizestart', function (event, ui) {
-    var grid = this;
-    var element = event.target;
-});
-```
+## API Documentation
 
-### onresizestop(event, ui)
+Please check out `doc/README.md` for more information about gridstack.js API.
 
-```javascript
-$('.grid-stack').on('resizestop', function (event, ui) {
-    var grid = this;
-    var element = event.target;
-});
-```
+## Questions and Answers
 
-### disable(event)
+Please feel free to as a questions here in issues, using [Stackoverflow](http://stackoverflow.com/search?q=gridstack) or [Slack chat](https://gridstackjs.troolee.com).
+We will glad to answer and help you as soon as we can.
 
-```javascipt
-$('.grid-stack').on('disable', function(event) {
-    var grid = event.target;
-});
-```
-
-### enable(event)
-
-```javascipt
-$('.grid-stack').on('enable', function(event) {
-    var grid = event.target;
-});
-```
-
-## API
-
-### add_widget(el, x, y, width, height, auto_position)
-
-Creates new widget and returns it.
-
-Parameters:
-
-- `el` - widget to add
-- `x`, `y`, `width`, `height` - widget position/dimensions (Optional)
-- `auto_position` - if `true` then `x`, `y` parameters will be ignored and widget will be places on the first available
-position
-
-Widget will be always placed even if result height is more than actual grid height. You need to use `will_it_fit` method
-before calling `add_widget` for additional check.
-
-```javascript
-$('.grid-stack').gridstack();
-
-var grid = $('.grid-stack').data('gridstack');
-grid.add_widget(el, 0, 0, 3, 2, true);
-```
-
-### make_widget(el)
-
-If you add elements to your gridstack container by hand, you have to tell gridstack afterwards to make them widgets. If you want gridstack to add the elements for you, use `add_widget` instead.
-Makes the given element a widget and returns it.
-
-Parameters:
-
-- `el` - element to convert to a widget
-
-```javascript
-$('.grid-stack').gridstack();
-
-$('.grid-stack').append('<div id="gsi-1" data-gs-x="0" data-gs-y="0" data-gs-width="3" data-gs-height="2" data-gs-auto-position="1"></div>')
-var grid = $('.grid-stack').data('gridstack');
-grid.make_widget('gsi-1');
-```
-
-### batch_update()
-
-Initailizes batch updates. You will see no changes until `commit` method is called.
-
-### cell_height()
-
-Gets current cell height.
-
-### cell_height(val)
-
-Update current cell height. This method rebuilds an internal CSS stylesheet. Note: You can expect performance issues if
-call this method too often.
-
-```javascript
-grid.cell_height(grid.cell_width() * 1.2);
-```
-
-### cell_width()
-
-Gets current cell width.
-
-### commit()
-
-Finishes batch updates. Updates DOM nodes. You must call it after `batch_update`.
-
-### destroy()
-
-Destroys a grid instance.
-
-### disable()
-
-Disables widgets moving/resizing. This is a shortcut for:
-
-```javascript
-grid.movable('.grid-stack-item', false);
-grid.resizable('.grid-stack-item', false);
-```
-
-### enable()
-
-Enables widgets moving/resizing. This is a shortcut for:
-
-```javascript
-grid.movable('.grid-stack-item', true);
-grid.resizable('.grid-stack-item', true);
-```
-
-### get_cell_from_pixel(position)
-
-Get the position of the cell under a pixel on screen.
-
-Parameters :
-
-- `position` - the position of the pixel to resolve in absolute coordinates, as an object with `top` and `left`properties
-
-Returns an object with properties `x` and `y` i.e. the column and row in the grid.
-
-### is_area_empty(x, y, width, height)
-
-Checks if specified area is empty.
-
-### locked(el, val)
-
-Locks/unlocks widget.
-
-- `el` - widget to modify.
-- `val` - if `true` widget will be locked.
-
-### min_width(el, val)
-
-Set the minWidth for a widget.
-
-- `el` - widget to modify.
-- `val` - A numeric value of the number of columns
-
-### min_height(el, val)
-
-Set the minHeight for a widget.
-
-- `el` - widget to modify.
-- `val` - A numeric value of the number of rows
-
-### movable(el, val)
-
-Enables/Disables moving.
-
-- `el` - widget to modify
-- `val` - if `true` widget will be draggable.
-
-### move(el, x, y)
-
-Changes widget position
-
-Parameters:
-
-- `el` - widget to move
-- `x`, `y` - new position. If value is `null` or `undefined` it will be ignored.
-
-### remove_widget(el, detach_node)
-
-Removes widget from the grid.
-
-Parameters:
-
-- `el` - widget to remove.
-- `detach_node` - if `false` DOM node won't be removed from the tree (Optional. Default `true`).
-
-### remove_all()
-
-Removes all widgets from the grid.
-
-### resize(el, width, height)
-
-Changes widget size
-
-Parameters:
-
-- `el` - widget to resize
-- `width`, `height` - new dimensions. If value is `null` or `undefined` it will be ignored.
-
-### resizable(el, val)
-
-Enables/Disables resizing.
-
-- `el` - widget to modify
-- `val` - if `true` widget will be resizable.
-
-### set_static(static_value)
-
-Toggle the grid static state.  Also toggle the `grid-stack-static` class.
-
-- `static_value` - if `true` the grid become static.
-
-### update(el, x, y, width, height)
-
-Parameters:
-
-- `el` - widget to move
-- `x`, `y` - new position. If value is `null` or `undefined` it will be ignored.
-- `width`, `height` - new dimensions. If value is `null` or `undefined` it will be ignored.
-
-Updates widget position/size.
-
-### will_it_fit(x, y, width, height, auto_position)
-
-Returns `true` if the `height` of the grid will be less the vertical constraint. Always returns `true` if grid doesn't
-have `height` constraint.
-
-```javascript
-if (grid.will_it_fit(new_node.x, new_node.y, new_node.width, new_node.height, true)) {
-    grid.add_widget(new_node.el, new_node.x, new_node.y, new_node.width, new_node.height, true);
-}
-else {
-    alert('Not enough free space to place the widget');
-}
-```
-
-
-## Utils
-
-### GridStackUI.Utils.sort(nodes[, dir[, width]])
-
-Sorts array of nodes
-
-- `nodes` - array to sort
-- `dir` - `1` for asc, `-1` for desc (optional)
-- `width` - width of the grid. If `undefined` the width will be calculated automatically (optional).
+Also please check our FAQ `doc/FAQ.md` before asking in case the answer is already there.
 
 ## Touch devices support
 
@@ -457,16 +190,18 @@ working on touch-based devices.
 <script src="gridstack.js"></script>
 ```
 
-Also `always_show_resize_handle` option may be useful:
+Also `alwaysShowResizeHandle` option may be useful:
 
 ```javascript
 $(function () {
     var options = {
-        always_show_resize_handle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     };
     $('.grid-stack').gridstack(options);
 });
 ```
+
+If you're still experiencing issues on touch devices please check [#444](https://github.com/troolee/gridstack.js/issues/444)
 
 ## Use with knockout.js
 
@@ -487,9 +222,9 @@ ko.components.register('dashboard-grid', {
                     }
 
                     var item = _.find(items, function (i) { return i.nodeType == 1 });
-                    grid.add_widget(item);
+                    grid.addWidget(item);
                     ko.utils.domNodeDisposal.addDisposeCallback(item, function () {
-                        grid.remove_widget(item);
+                        grid.removeWidget(item);
                     });
                 };
             };
@@ -500,7 +235,7 @@ ko.components.register('dashboard-grid', {
     template:
         [
             '<div class="grid-stack" data-bind="foreach: {data: widgets, afterRender: afterAddWidget}">',
-            '   <div class="grid-stack-item" data-bind="attr: {\'data-gs-x\': $data.x, \'data-gs-y\': $data.y, \'data-gs-width\': $data.width, \'data-gs-height\': $data.height, \'data-gs-auto-position\': $data.auto_position}">',
+            '   <div class="grid-stack-item" data-bind="attr: {\'data-gs-x\': $data.x, \'data-gs-y\': $data.y, \'data-gs-width\': $data.width, \'data-gs-height\': $data.height, \'data-gs-auto-position\': $data.autoPosition}">',
             '       <div class="grid-stack-item-content">...</div>',
             '   </div>',
             '</div> '
@@ -533,11 +268,11 @@ See examples: [example 1](http://troolee.github.io/gridstack.js/demo/knockout.ht
 
 **Notes:** It's very important to exclude training spaces after widget template:
 
-```
+```javascript
 template:
     [
         '<div class="grid-stack" data-bind="foreach: {data: widgets, afterRender: afterAddWidget}">',
-        '   <div class="grid-stack-item" data-bind="attr: {\'data-gs-x\': $data.x, \'data-gs-y\': $data.y, \'data-gs-width\': $data.width, \'data-gs-height\': $data.height, \'data-gs-auto-position\': $data.auto_position}">',
+        '   <div class="grid-stack-item" data-bind="attr: {\'data-gs-x\': $data.x, \'data-gs-y\': $data.y, \'data-gs-width\': $data.width, \'data-gs-height\': $data.height, \'data-gs-auto-position\': $data.autoPosition}">',
         '       ....',
         '   </div>', // <-- NO SPACE **AFTER** </div>
         '</div> '    // <-- NO SPACE **BEFORE** </div>
@@ -665,10 +400,10 @@ var serialization = [
 serialization = GridStackUI.Utils.sort(serialization);
 
 var grid = $('.grid-stack').data('gridstack');
-grid.remove_all();
+grid.removeAll();
 
 _.each(serialization, function (node) {
-    grid.add_widget($('<div><div class="grid-stack-item-content" /></div>'),
+    grid.addWidget($('<div><div class="grid-stack-item-content" /></div>'),
         node.x, node.y, node.width, node.height);
 });
 ```
@@ -737,6 +472,12 @@ for i in range(N):
 There are at least two more issues with gridstack in IE8 with jQueryUI resizable (it seems it doesn't work) and
 droppable. If you have any suggestions about support of IE8 you are welcome here: https://github.com/troolee/gridstack.js/issues/76
 
+## Use with require.js
+
+If you're using require.js and a single file jQueryUI please check out this
+[Stackoverflow question](http://stackoverflow.com/questions/35582945/redundant-dependencies-with-requirejs) to get it
+working properly.
+
 
 ## Nested grids
 
@@ -745,16 +486,77 @@ during initialization.
 See example: [Nested grid demo](http://troolee.github.io/gridstack.js/demo/nested.html)
 
 
+## Resizing active grid
+
+Resizing on-the-fly is possible, though experimental. This may be used to make gridstack responsive. gridstack will change the total number of columns and will attempt to update the width and x values of each widget to be more logical.
+See example: [Responsive grid demo](http://troolee.github.io/gridstack.js/demo/responsive.html)
+
+## Using AniJS
+
+Using AniJS with gridstack is a breeze. In the following example, a listener is added that gets triggered by a widget being added.
+See widgets wiggle! [AniJS demo](http://troolee.github.io/gridstack.js/demo/anijs.html)
+
+The Team
+========
+
+gridstack.js is currently maintained by [Pavel Reznikov](https://github.com/troolee), [Dylan Weiss](https://github.com/radiolips)
+and [Kevin Dietrich](https://github.com/kdietrich). And we appreciate [all contributors](https://github.com/troolee/gridstack.js/graphs/contributors)
+for help.
+
+
 Changes
 =======
 
-#### v0.2.4 (development version)
+#### v0.3.0-dev (Development Version)
+
+- add oneColumnModeClass option to grid.
+- remove 768px CSS styles, moved to grid-stack-one-column-mode class.
+- add max-width override on grid-stck-one-column-mode ([#462](https://github.com/troolee/gridstack.js/issues/462)).
+- add internal function`isNodeChangedPosition`, minor optimization to move/drag.
+- drag'n'drop plugin system. Move jQuery UI dependencies to separate plugin file.
+
+#### v0.2.6 (2016-08-17)
+
+- update requirements to the latest versions of jQuery (v3.1.0+) and jquery-ui (v1.12.0+).
+- fix jQuery `size()` ([#486](https://github.com/troolee/gridstack.js/issues/486)).
+- update `destroy([detachGrid])` call ([#422](https://github.com/troolee/gridstack.js/issues/422)).
+- don't mutate options when calling `draggable` and `resizable`. ([#505](https://github.com/troolee/gridstack.js/issues/505)).
+- update _notify to allow detach ([#411](https://github.com/troolee/gridstack.js/issues/411)).
+- fix code that checks for jquery-ui ([#481](https://github.com/troolee/gridstack.js/issues/481)).
+- fix `cellWidth` calculation on empty grid
+
+#### v0.2.5 (2016-03-02)
+
+- update names to respect js naming convention.
+- `cellHeight` and `verticalMargin` can now be string (e.g. '3em', '20px') (Thanks to @jlowcs).
+- add `maxWidth`/`maxHeight` methods.
+- add `enableMove`/`enableResize` methods.
+- fix window resize issue #331.
+- add options `disableDrag` and `disableResize`.
+- fix `batchUpdate`/`commit` (Thank to @radiolips)
+- remove dependency of FontAwesome
+- RTL support
+- `'auto'` value for `cellHeight` option
+- fix `setStatic` method
+- add `setAnimation` method to API
+- add `setGridWidth` method ([#227](https://github.com/troolee/gridstack.js/issues/227))
+- add `removable`/`removeTimeout` *(experimental)*
+- add `detachGrid` parameter to `destroy` method ([#216](https://github.com/troolee/gridstack.js/issues/216)) (thanks @jhpedemonte)
+- add `useOffset` parameter to `getCellFromPixel` method ([#237](https://github.com/troolee/gridstack.js/issues/237))
+- add `minWidth`, `maxWidth`, `minHeight`, `maxHeight`, `id` parameters to `addWidget` ([#188](https://github.com/troolee/gridstack.js/issues/188))
+- add `added` and `removed` events for when a widget is added or removed, respectively. ([#54](https://github.com/troolee/gridstack.js/issues/54))
+- add `acceptWidgets` parameter. Widgets can now be draggable between grids or from outside *(experimental)*
+
+#### v0.2.4 (2016-02-15)
 
 - fix closure compiler/linter warnings
 - add `static_grid` option.
 - add `min_width`/`min_height` methods (Thanks to @cvillemure)
 - add `destroy` method (Thanks to @zspitzer)
 - add `placeholder_text` option (Thanks to @slauyama)
+- add `handle_class` option.
+- add `make_widget` method.
+- lodash v 4.x support (Thanks to @andrewr88)
 
 #### v0.2.3 (2015-06-23)
 
@@ -813,7 +615,7 @@ License
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2016 Pavel Reznikov
+Copyright (c) 2014-2016 Pavel Reznikov, Dylan Weiss
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
