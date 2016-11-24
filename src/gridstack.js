@@ -945,7 +945,7 @@
         var getHeight;
 
         if (typeof maxHeight == 'undefined') {
-            maxHeight = this._styles._max || this.opts.height;;
+            maxHeight = this._styles._max || this.opts.height;
             this._initStyles();
             this._updateContainerHeight();
         }
@@ -1283,7 +1283,7 @@
         if (typeof id != 'undefined') { el.attr('data-gs-id', id); }
         this.container.append(el);
 
-        this.make_widget(el);
+        this.makeWidget(el);
 
         return el;
     };
@@ -1352,7 +1352,7 @@
         el.each(function(index, el) {
             el = $(el);
             var node = el.data('_gridstack_node');
-            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined' || self.opts.static_grid) {
+            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined' || self.opts.staticGrid) {
                 return;
             }
 
@@ -1372,7 +1372,8 @@
         el.each(function(index, el) {
             el = $(el);
             var node = el.data('_gridstack_node');
-            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined' || self.opts.static_grid) {
+
+            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined' || self.opts.staticGrid) {
                 return;
             }
 
@@ -1636,9 +1637,9 @@
     GridStack.prototype.refreshNodes = function() {
         var that = this;
         this.removeAll(false);
-        this.container.find('.' + this.opts.item_class).each(function(k, node){
+        this.container.find('.' + this.opts.itemClass).each(function(k, node){
             $(node).off('dragstart dragstop drag resizestart resizestop resize');
-            that.make_widget(node);
+            that.makeWidget(node);
         });
     };
 
