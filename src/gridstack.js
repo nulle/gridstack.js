@@ -222,6 +222,31 @@
         return collisionNode === null || typeof collisionNode === 'undefined';
     };
 
+    GridStackEngine.prototype.findFreeSpace = function(w, h) {
+        var freeSpace = null,
+            i, j;
+
+            // first free for 1x1 or we have specified width and height
+            if (!w) { w = 1; }
+            if (!h) { h = 1; }
+
+            for (i = 0; i < this.width; i++) {
+                if (freeSpace) {
+                    break;
+                }
+                for (j = 0; j < this.height; j++) {
+                    if (freeSpace) {
+                        break;
+                    }
+                    if (this.isAreaEmpty(i, j, w, h)) {
+                        freeSpace = {x: i, y: j, w: w, h: h};
+                    }
+                }
+            }
+
+            return freeSpace;
+    };
+
     GridStackEngine.prototype._sortNodes = function(dir) {
         this.nodes = Utils.sort(this.nodes, dir, this.width);
     };
@@ -425,6 +450,11 @@
         }
         if (this.height) {
             res &= clone.getGridHeight() <= this.height;
+
+            // always allow moving the one out of bounds
+            if (node.y + node.height > this.height) {
+            	res = true;
+            }
         }
 
         return res;
@@ -1352,7 +1382,7 @@
         el.each(function(index, el) {
             el = $(el);
             var node = el.data('_gridstack_node');
-            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined' || self.opts.staticGrid) {
+            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined') {
                 return;
             }
 
@@ -1373,7 +1403,7 @@
             el = $(el);
             var node = el.data('_gridstack_node');
 
-            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined' || self.opts.staticGrid) {
+            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined') {
                 return;
             }
 
@@ -1617,6 +1647,10 @@
         return this.grid.isAreaEmpty(x, y, width, height);
     };
 
+    GridStack.prototype.findFreeSpace = function(w, h) {
+        return this.grid.findFreeSpace(w, h);
+    };
+
     GridStack.prototype.setStatic = function(staticValue) {
         this.opts.staticGrid = (staticValue === true);
         this.enableMove(!staticValue);
@@ -1634,13 +1668,40 @@
         }
     };
 
-    GridStack.prototype.refreshNodes = function() {
+    GridStack.prototype.refreshNodes = function(force, isDisabled) {
         var that = this;
-        this.removeAll(false);
+
+        if (force) {
+            this.removeAll(false);
+        } else {
+            // remove all nodes, purge those that arent attached anymore
+            for (var i = 0; i < this.grid.nodes.length; i++) {
+                node = this.grid.nodes[i];
+                this.removeWidget(node, !!node._updating);
+                // this.removeWidget(node, false);
+            }
+            this.grid.nodes = [];
+            if (!this.placeholder.hasClass('drag-external')) {
+                this.placeholder.detach();
+                this.placeholder.hide();
+            }
+            this._updateContainerHeight();
+        }
+
         this.container.find('.' + this.opts.itemClass).each(function(k, node){
             $(node).off('dragstart dragstop drag resizestart resizestop resize');
             that.makeWidget(node);
         });
+
+        if (this.opts.staticGrid && isDisabled) {
+        	return;
+        }
+
+		if (isDisabled) {
+			this.disable();
+		} else {
+			this.enable();
+		}
     };
 
     GridStack.prototype.getCellFromAbsolutePixel = function(nodeOffset) {
