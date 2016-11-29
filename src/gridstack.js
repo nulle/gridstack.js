@@ -1382,7 +1382,7 @@
         el.each(function(index, el) {
             el = $(el);
             var node = el.data('_gridstack_node');
-            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined') {
+            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined' || self.opts.staticGrid) {
                 return;
             }
 
@@ -1403,7 +1403,7 @@
             el = $(el);
             var node = el.data('_gridstack_node');
 
-            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined') {
+            if (typeof node == 'undefined' || node === null || typeof $.ui === 'undefined' || self.opts.staticGrid) {
                 return;
             }
 
