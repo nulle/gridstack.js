@@ -1104,7 +1104,7 @@
             }
 
             if (event.type == 'drag') {
-                if (x < 0 || x >= self.grid.width || y < 0) {
+                if (x < 0 || x >= self.grid.width || y < 0 || (self.grid.height && y >= self.grid.height)) {
                     if (self.opts.removable === true) {
                         self._setupRemovingTimeout(el);
                     }
@@ -1668,25 +1668,10 @@
         }
     };
 
-    GridStack.prototype.refreshNodes = function(force, isDisabled) {
+    GridStack.prototype.refreshNodes = function(isDisabled) {
         var that = this;
 
-        if (force) {
-            this.removeAll(false);
-        } else {
-            // remove all nodes, purge those that arent attached anymore
-            for (var i = 0; i < this.grid.nodes.length; i++) {
-                node = this.grid.nodes[i];
-                this.removeWidget(node, !!node._updating);
-                // this.removeWidget(node, false);
-            }
-            this.grid.nodes = [];
-            if (!this.placeholder.hasClass('drag-external')) {
-                this.placeholder.detach();
-                this.placeholder.hide();
-            }
-            this._updateContainerHeight();
-        }
+        this.removeAll(false);
 
         this.container.find('.' + this.opts.itemClass).each(function(k, node){
             $(node).off('dragstart dragstop drag resizestart resizestop resize');
