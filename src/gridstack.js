@@ -1037,7 +1037,7 @@
         if (this.grid._updateCounter) {
             return;
         }
-        var height = this.grid.getGridHeight();
+        var height = this.opts.height || this.grid.getGridHeight();
         this.container.attr('data-gs-current-height', height);
         if (!this.opts.cellHeight) {
             return ;
