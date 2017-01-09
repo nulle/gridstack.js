@@ -190,7 +190,7 @@
         return _.find(this.nodes, function(n) { return el.get(0) === n.el.get(0); });
     };
 
-    GridStackEngine.prototype._fixCollisions = function(node) {
+    GridStackEngine.prototype._fixCollisions = function(node, isClone) {
         var self = this;
         this._sortNodes(-1);
 
@@ -204,8 +204,34 @@
             if (typeof collisionNode == 'undefined') {
                 return;
             }
-            this.moveNode(collisionNode, collisionNode.x, node.y + node.height,
-                collisionNode.width, collisionNode.height, true);
+
+            // will try to fix the collision
+            var newPos,
+                newY = node.y + node.height,
+                wrongPos = !isClone && ((node.y + node.height + collisionNode.height) > this.height);
+
+            if (wrongPos) {
+                // if the pos is out of bounds, put it on first available
+                newPos = this.findFreeSpace(collisionNode.width, collisionNode.height);
+                if (!newPos) {
+                    newPos = this.findFreeSpace();
+                }
+                if (!newPos) {
+                    return; // hmm
+                }
+            } else {
+                newPos = {
+                    x: collisionNode.x,
+                    y: node.y + node.height,
+                    w: collisionNode.width,
+                    h: collisionNode.height
+                };
+            }
+
+            if (newPos) {
+                this.moveNode(collisionNode, newPos.x, newPos.y, newPos.w, newPos.h, true, isClone);
+            }
+
         }
     };
 
@@ -230,11 +256,11 @@
             if (!w) { w = 1; }
             if (!h) { h = 1; }
 
-            for (i = 0; i < this.width; i++) {
+            for (i = 0; i <= (this.width - w); i++) {
                 if (freeSpace) {
                     break;
                 }
-                for (j = 0; j < this.height; j++) {
+                for (j = 0; j <= (this.height - h); j++) {
                     if (freeSpace) {
                         break;
                     }
@@ -317,7 +343,9 @@
             node.width = 1;
         }
 
-        if (node.height < 1) {
+        if (this.height && (node.height > this.height)) {
+            node.height = this.height;
+        } else if (node.height < 1) {
             node.height = 1;
         }
 
@@ -362,7 +390,7 @@
         return _.filter(this.nodes, function(n) { return n._dirty; });
     };
 
-    GridStackEngine.prototype.addNode = function(node, triggerAddEvent) {
+    GridStackEngine.prototype.addNode = function(node, triggerAddEvent, isClone) {
         node = this._prepareNode(node);
 
         if (typeof node.maxWidth != 'undefined') { node.width = Math.min(node.width, node.maxWidth); }
@@ -395,7 +423,7 @@
             this._addedNodes.push(_.clone(node));
         }
 
-        this._fixCollisions(node);
+        this._fixCollisions(node, isClone);
         this._packNodes();
         this._notify();
         return node;
@@ -439,7 +467,7 @@
             return true;
         }
 
-        clone.moveNode(clonedNode, x, y, width, height);
+        clone.moveNode(clonedNode, x, y, width, height, false, true);
 
         var res = true;
 
@@ -453,7 +481,7 @@
 
             // always allow moving the one out of bounds
             if (node.y + node.height > this.height) {
-            	res = true;
+                res = true;
             }
         }
 
@@ -471,7 +499,7 @@
             this.float,
             0,
             _.map(this.nodes, function(n) { return $.extend({}, n); }));
-        clone.addNode(node);
+        clone.addNode(node, false, true);
         return clone.getGridHeight() <= this.height;
     };
 
@@ -492,7 +520,7 @@
         return true;
     };
 
-    GridStackEngine.prototype.moveNode = function(node, x, y, width, height, noPack) {
+    GridStackEngine.prototype.moveNode = function(node, x, y, width, height, noPack, isClone) {
         if (!this.isNodeChangedPosition(node, x, y, width, height)) {
             return node;
         }
@@ -525,7 +553,7 @@
 
         node = this._prepareNode(node, resizing);
 
-        this._fixCollisions(node);
+        this._fixCollisions(node, isClone);
         if (!noPack) {
             this._packNodes();
             this._notify();
