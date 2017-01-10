@@ -207,17 +207,26 @@
 
             // will try to fix the collision
             var newPos,
-                newY = node.y + node.height,
                 wrongPos = !isClone && ((node.y + node.height + collisionNode.height) > this.height);
 
             if (wrongPos) {
-                // if the pos is out of bounds, put it on first available
-                newPos = this.findFreeSpace(collisionNode.width, collisionNode.height, collisionNode);
-                if (!newPos) {
-                    newPos = this.findFreeSpace();
-                }
-                if (!newPos) {
-                    return; // hmm
+                // check the original Y position first
+                if (this.isAreaEmpty(collisionNode.x, collisionNode._origY, collisionNode.width, collisionNode.height, collisionNode)) {
+                    newPos = {
+                        x: collisionNode.x,
+                        y: collisionNode._origY,
+                        w: collisionNode.width,
+                        h: collisionNode.height
+                    };
+                } else {
+                    // if the pos is out of bounds, put it on first available
+                    newPos = this.findFreeSpace(collisionNode.width, collisionNode.height, collisionNode);
+                    if (!newPos) {
+                        newPos = this.findFreeSpace();
+                    }
+                    if (!newPos) {
+                        return; // hmm
+                    }
                 }
             } else {
                 newPos = {
@@ -229,7 +238,8 @@
             }
 
             if (newPos) {
-                this.moveNode(collisionNode, newPos.x, newPos.y, newPos.w, newPos.h, true, isClone);
+            	// all recursive collision fixes are treated like they are isClone true
+                this.moveNode(collisionNode, newPos.x, newPos.y, newPos.w, newPos.h, true, true);
             }
 
         }
@@ -243,14 +253,13 @@
         return collisionNodes;
     };
 
-    GridStackEngine.prototype.isAreaEmpty = function(x, y, width, height) {
-    	var collisionNodes = this.whatIsHere(x, y, width, height);
-        return collisionNodes.length === 0;
+    GridStackEngine.prototype.isAreaEmpty = function(x, y, width, height, exceptNode) {
+        var collisionNodes = this.whatIsHere(x, y, width, height);
+        return (!collisionNodes.length || (exceptNode && collisionNodes.length === 1 && collisionNodes[0] === exceptNode));
     };
 
     GridStackEngine.prototype.findFreeSpace = function(w, h, forNode) {
         var freeSpace = null,
-            nodesHere = [],
             i, j;
 
             // first free for 1x1 or we have specified width and height
@@ -265,8 +274,7 @@
                     if (freeSpace) {
                         break;
                     }
-                    nodesHere = this.whatIsHere(i, j, w, h);
-                    if (!nodesHere.length || (forNode && nodesHere.length === 1 && nodesHere[0] === forNode)) {
+                    if (this.isAreaEmpty(i, j, w, h, forNode)) {
                     	freeSpace = {x: i, y: j, w: w, h: h};
                     }
                 }
