@@ -212,7 +212,7 @@
 
             if (wrongPos) {
                 // if the pos is out of bounds, put it on first available
-                newPos = this.findFreeSpace(collisionNode.width, collisionNode.height);
+                newPos = this.findFreeSpace(collisionNode.width, collisionNode.height, collisionNode);
                 if (!newPos) {
                     newPos = this.findFreeSpace();
                 }
@@ -237,19 +237,20 @@
 
     GridStackEngine.prototype.whatIsHere = function(x, y, width, height) {
     	var nn = {x: x || 0, y: y || 0, width: width || 1, height: height || 1};
-        var collisionNode = _.find(this.nodes, _.bind(function(n) {
+        var collisionNodes = _.filter(this.nodes, _.bind(function(n) {
             return Utils.isIntercepted(n, nn);
         }, this));
-        return collisionNode;
+        return collisionNodes;
     };
 
     GridStackEngine.prototype.isAreaEmpty = function(x, y, width, height) {
-    	var collisionNode = this.whatIsHere(x, y, width, height);
-        return collisionNode === null || typeof collisionNode === 'undefined';
+    	var collisionNodes = this.whatIsHere(x, y, width, height);
+        return collisionNodes.length === 0;
     };
 
-    GridStackEngine.prototype.findFreeSpace = function(w, h) {
+    GridStackEngine.prototype.findFreeSpace = function(w, h, forNode) {
         var freeSpace = null,
+            nodesHere = [],
             i, j;
 
             // first free for 1x1 or we have specified width and height
@@ -264,8 +265,9 @@
                     if (freeSpace) {
                         break;
                     }
-                    if (this.isAreaEmpty(i, j, w, h)) {
-                        freeSpace = {x: i, y: j, w: w, h: h};
+                    nodesHere = this.whatIsHere(i, j, w, h);
+                    if (!nodesHere.length || (forNode && nodesHere.length === 1 && nodesHere[0] === forNode)) {
+                    	freeSpace = {x: i, y: j, w: w, h: h};
                     }
                 }
             }
