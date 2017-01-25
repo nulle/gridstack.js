@@ -1282,11 +1282,12 @@
         el = $(el);
 
         el.addClass(this.opts.itemClass);
-        var node = self.grid.addNode({
-            x: el.attr('data-gs-x'),
-            y: el.attr('data-gs-y'),
-            width: el.attr('data-gs-width'),
-            height: el.attr('data-gs-height'),
+
+        var props = {
+            x: parseInt(el.attr('data-gs-x'), 10),
+            y: parseInt(el.attr('data-gs-y'), 10),
+            width: parseInt(el.attr('data-gs-width'), 10),
+            height: parseInt(el.attr('data-gs-height'), 10),
             maxWidth: el.attr('data-gs-max-width'),
             minWidth: el.attr('data-gs-min-width'),
             maxHeight: el.attr('data-gs-max-height'),
@@ -1298,7 +1299,24 @@
             el: el,
             id: el.attr('data-gs-id'),
             _grid: self
-        }, triggerAddEvent);
+        };
+
+        if (!this.isAreaEmpty(props.x, props.y, props.width, props.height)) {
+        	var freeSpace = this.findFreeSpace(props.width, props.height);
+        	if (!freeSpace) {
+        		freeSpace = this.findFreeSpace(1, 1);
+        	}
+        	if (freeSpace) {
+        		props.x = freeSpace.x;
+        		props.y = freeSpace.y;
+        		props.width = freeSpace.w;
+        		props.height = freeSpace.h;
+        	} else {
+        		return;
+        	}
+        }
+
+        var node = self.grid.addNode(props, triggerAddEvent);
         el.data('_gridstack_node', node);
 
         this._prepareElementsByNode(el, node);
