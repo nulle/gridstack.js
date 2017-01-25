@@ -219,7 +219,7 @@
 
     GridStackEngine.prototype.isAreaEmpty = function(x, y, width, height, exceptNode) {
     	// first check if is not out of bounds
-    	if (y + height > this.height || x + width > this.width) {
+    	if (y < 0 || y + height > this.height || x < 0 || x + width > this.width) {
     		return false;
     	}
         var collisionNodes = this.whatIsHere(x, y, width, height);
@@ -1118,7 +1118,17 @@
             }
 
             if (event.type == 'drag') {
-                if (x < 0 || x >= self.grid.width || y < 0 || (self.grid.height && y >= self.grid.height)) {
+                var cannotPutHere = !self.isAreaEmpty(x, y),
+                    whatIsHere;
+
+                if (cannotPutHere) {
+                    whatIsHere = self.grid.whatIsHere(x, y);
+                    if (whatIsHere && whatIsHere[0] && whatIsHere[0].el !== this.placeholder) {
+                        cannotPutHere = false;
+                    }
+                }
+
+                if (cannotPutHere) {
                     if (self.opts.removable === true) {
                         self._setupRemovingTimeout(el);
                     }
@@ -1675,8 +1685,8 @@
         this._updateContainerHeight();
     };
 
-    GridStack.prototype.isAreaEmpty = function(x, y, width, height) {
-        return this.grid.isAreaEmpty(x, y, width, height);
+    GridStack.prototype.isAreaEmpty = function(x, y, width, height, exceptNode) {
+        return this.grid.isAreaEmpty(x, y, width, height, exceptNode);
     };
 
     GridStack.prototype.findFreeSpace = function(w, h) {
