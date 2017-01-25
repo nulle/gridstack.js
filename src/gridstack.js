@@ -205,43 +205,7 @@
                 return;
             }
 
-            // will try to fix the collision
-            var newPos,
-                wrongPos = !isClone && ((node.y + node.height + collisionNode.height) > this.height);
-
-            if (wrongPos) {
-                // check the original Y position first
-                if (this.isAreaEmpty(collisionNode.x, collisionNode._origY, collisionNode.width, collisionNode.height, collisionNode)) {
-                    newPos = {
-                        x: collisionNode.x,
-                        y: collisionNode._origY,
-                        w: collisionNode.width,
-                        h: collisionNode.height
-                    };
-                } else {
-                    // if the pos is out of bounds, put it on first available
-                    newPos = this.findFreeSpace(collisionNode.width, collisionNode.height, collisionNode);
-                    if (!newPos) {
-                        newPos = this.findFreeSpace();
-                    }
-                    if (!newPos) {
-                        return; // hmm
-                    }
-                }
-            } else {
-                newPos = {
-                    x: collisionNode.x,
-                    y: node.y + node.height,
-                    w: collisionNode.width,
-                    h: collisionNode.height
-                };
-            }
-
-            if (newPos) {
-            	// all recursive collision fixes are treated like they are isClone true
-                this.moveNode(collisionNode, newPos.x, newPos.y, newPos.w, newPos.h, true, true);
-            }
-
+            this.moveNode(collisionNode, collisionNode.x, node.y + node.height, collisionNode.width, collisionNode.height, true);
         }
     };
 
@@ -254,6 +218,10 @@
     };
 
     GridStackEngine.prototype.isAreaEmpty = function(x, y, width, height, exceptNode) {
+    	// first check if is not out of bounds
+    	if (y + height > this.height || x + width > this.width) {
+    		return false;
+    	}
         var collisionNodes = this.whatIsHere(x, y, width, height);
         return (!collisionNodes.length || (exceptNode && collisionNodes.length === 1 && collisionNodes[0] === exceptNode));
     };
@@ -459,6 +427,10 @@
             return true;
         }
 
+        if (!this.isAreaEmpty(x, y, width, height, node)) {
+            return false;
+        }
+
         var clonedNode;
         var clone = new GridStackEngine(
             this.width,
@@ -545,6 +517,10 @@
         if (typeof node.minHeight != 'undefined') { height = Math.max(height, node.minHeight); }
 
         if (node.x == x && node.y == y && node.width == width && node.height == height) {
+            return node;
+        }
+
+        if (!this.isAreaEmpty(x, y, width, height, node)) {
             return node;
         }
 
