@@ -1211,6 +1211,10 @@
             if (event.type == 'resizestart') {
                 o.find('.grid-stack-item').trigger('resizestart');
             }
+
+            if (typeof self.opts.draggable.start === 'function') {
+            	self.opts.draggable.start(event, ui);
+            }
         };
 
         var onEndMoving = function(event, ui) {
