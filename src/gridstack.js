@@ -1118,12 +1118,12 @@
             }
 
             if (event.type == 'drag') {
-                var cannotPutHere = !self.isAreaEmpty(x, y),
+                var cannotPutHere = !self.isAreaEmpty(x, y, node.width, node.height, node),
                     whatIsHere;
 
                 if (cannotPutHere) {
-                    whatIsHere = self.grid.whatIsHere(x, y);
-                    if (whatIsHere && whatIsHere[0] && whatIsHere[0].el !== this.placeholder) {
+                    whatIsHere = self.grid.whatIsHere(x, y, node.width, node.height);
+                    if (whatIsHere && whatIsHere.length === 1 && whatIsHere[0].el === this.placeholder) {
                         cannotPutHere = false;
                     }
                 }
