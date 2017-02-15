@@ -302,6 +302,7 @@
     transform: rotate(180deg);
 }
 */
+/*
 @media (max-width: 768px) {
   .grid-stack-item {
     position: relative !important;
@@ -318,3 +319,4 @@
     height: auto !important;
   }
 }
+*/
