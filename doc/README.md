@@ -17,7 +17,7 @@ gridstack.js API
   - [enable(event)](#enableevent)
   - [removed(event, items)](#removedevent-items)
   - [resizestart(event, ui)](#resizestartevent-ui)
-  - [resizestop(event, ui)](#resizestopevent-ui)
+  - [gsresizestop(event, ui)](#gsresizestopevent-ui)
 - [API](#api)
   - [addWidget(el[, x, y, width, height, autoPosition, minWidth, maxWidth, minHeight, maxHeight, id])](#addwidgetel-x-y-width-height-autoposition-minwidth-maxwidth-minheight-maxheight-id)
   - [batchUpdate()](#batchupdate)
@@ -78,6 +78,7 @@ gridstack.js API
 - `float` - enable floating widgets (default: `false`) See [example](http://troolee.github.io/gridstack.js/demo/float.html)
 - `itemClass` - widget class (default: `'grid-stack-item'`)
 - `minWidth` - minimal width. If window width is less, grid will be shown in one-column mode (default: `768`)
+- `disableOneColumnMode` - disables the onColumnMode when the window width is less than minWidth (default: 'false')
 - `oneColumnModeClass` - class set on grid when in one column mode (default: 'grid-stack-one-column-mode')
 - `placeholderClass` - class for placeholder (default: `'grid-stack-placeholder'`)
 - `placeholderText` - placeholder default content (default: `''`)
@@ -110,6 +111,7 @@ gridstack.js API
 - `data-gs-locked` - the widget will be locked. It means another widget wouldn't be able to move it during dragging or resizing.
 The widget can still be dragged or resized. You need to add `data-gs-no-resize` and `data-gs-no-move` attributes
 to completely lock the widget.
+- `data-gs-resize-handles` - sets resize handles for a specific widget.
 
 ## Events
 
@@ -192,12 +194,11 @@ $('.grid-stack').on('resizestart', function(event, ui) {
 });
 ```
 
-### resizestop(event, ui)
+### gsresizestop(event, ui)
 
 ```javascript
-$('.grid-stack').on('resizestop', function(event, ui) {
-    var grid = this;
-    var element = event.target;
+$('.grid-stack').on('gsresizestop', function(event, elem) {
+    var newHeight = $(elem).attr('data-gs-height');
 });
 ```
 
