@@ -190,7 +190,7 @@
         return _.find(this.nodes, function(n) { return el.get(0) === n.el.get(0); });
     };
 
-    GridStackEngine.prototype._fixCollisions = function(node, isClone) {
+    GridStackEngine.prototype._fixCollisions = function(node) {
         var self = this;
         this._sortNodes(-1);
 
@@ -205,7 +205,8 @@
                 return;
             }
 
-            this.moveNode(collisionNode, collisionNode.x, node.y + node.height, collisionNode.width, collisionNode.height, true);
+            this.moveNode(collisionNode, collisionNode.x, node.y + node.height,
+                collisionNode.width, collisionNode.height, true);
         }
     };
 
@@ -368,7 +369,7 @@
         return _.filter(this.nodes, function(n) { return n._dirty; });
     };
 
-    GridStackEngine.prototype.addNode = function(node, triggerAddEvent, isClone) {
+    GridStackEngine.prototype.addNode = function(node, triggerAddEvent) {
         node = this._prepareNode(node);
 
         if (typeof node.maxWidth != 'undefined') { node.width = Math.min(node.width, node.maxWidth); }
@@ -401,7 +402,7 @@
             this._addedNodes.push(_.clone(node));
         }
 
-        this._fixCollisions(node, isClone);
+        this._fixCollisions(node);
         this._packNodes();
         this._notify();
         return node;
@@ -449,7 +450,7 @@
             return true;
         }
 
-        clone.moveNode(clonedNode, x, y, width, height, false, true);
+        clone.moveNode(clonedNode, x, y, width, height);
 
         var res = true;
 
@@ -481,7 +482,7 @@
             this.float,
             0,
             _.map(this.nodes, function(n) { return $.extend({}, n); }));
-        clone.addNode(node, false, true);
+        clone.addNode(node);
         return clone.getGridHeight() <= this.height;
     };
 
@@ -502,7 +503,7 @@
         return true;
     };
 
-    GridStackEngine.prototype.moveNode = function(node, x, y, width, height, noPack, isClone) {
+    GridStackEngine.prototype.moveNode = function(node, x, y, width, height, noPack) {
         if (!this.isNodeChangedPosition(node, x, y, width, height)) {
             return node;
         }
@@ -539,7 +540,7 @@
 
         node = this._prepareNode(node, resizing);
 
-        this._fixCollisions(node, isClone);
+        this._fixCollisions(node);
         if (!noPack) {
             this._packNodes();
             this._notify();
