@@ -191,23 +191,23 @@
     };
 
     GridStackEngine.prototype._fixCollisions = function(node) {
-        var self = this;
-        this._sortNodes(-1);
+        // var self = this;
+        // this._sortNodes(-1);
 
-        var nn = node;
-        var hasLocked = Boolean(_.find(this.nodes, function(n) { return n.locked; }));
-        if (!this.float && !hasLocked) {
-            nn = {x: 0, y: node.y, width: this.width, height: node.height};
-        }
-        while (true) {
-            var collisionNode = _.find(this.nodes, _.bind(Utils._collisionNodeCheck, {node: node, nn: nn}));
-            if (typeof collisionNode == 'undefined') {
-                return;
-            }
+        // var nn = node;
+        // var hasLocked = Boolean(_.find(this.nodes, function(n) { return n.locked; }));
+        // if (!this.float && !hasLocked) {
+        //     nn = {x: 0, y: node.y, width: this.width, height: node.height};
+        // }
+        // while (true) {
+        //     var collisionNode = _.find(this.nodes, _.bind(Utils._collisionNodeCheck, {node: node, nn: nn}));
+        //     if (typeof collisionNode == 'undefined') {
+        //         return;
+        //     }
 
-            this.moveNode(collisionNode, collisionNode.x, node.y + node.height,
-                collisionNode.width, collisionNode.height, true);
-        }
+        //     this.moveNode(collisionNode, collisionNode.x, node.y + node.height,
+        //         collisionNode.width, collisionNode.height, true);
+        // }
     };
 
     GridStackEngine.prototype.whatIsHere = function(x, y, width, height) {
